@@ -1,0 +1,44 @@
+services:
+  php:
+    build:
+      context: ./php/
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    container_name: php
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./php:/var/www/html
+    depends_on:
+      - mysql
+
+  go:
+    build:
+      context: ./go/
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    container_name: go
+    entrypoint: ["./app"]
+    depends_on:
+      - mysql
+
+  mysql:
+    build:
+      context: ./sql/
+      dockerfile: Dockerfile
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql:/var/lib/mysql
+
+volumes:
+  mysql:
+    driver: local
